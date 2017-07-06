@@ -223,7 +223,7 @@ class DMatrix(object):
     _feature_types = None
 
     def __init__(self, data, label=None, missing=None,
-                 weight=None, silent=False,
+                 weight=None, timing=None, silent=False,
                  feature_names=None, feature_types=None):
         """
         Data matrix used in XGBoost.
@@ -241,6 +241,8 @@ class DMatrix(object):
             None, defaults to np.nan.
         weight : list or numpy 1-D array , optional
             Weight for each instance.
+        timing : list or numpy 1-D array , optional
+            Timing for each instance.
         silent : boolean, optional
             Whether print messages during construction
         feature_names : list, optional
@@ -279,6 +281,8 @@ class DMatrix(object):
             self.set_label(label)
         if weight is not None:
             self.set_weight(weight)
+        if timing is not None:
+            self.set_timing(timing)
 
         self.feature_names = feature_names
         self.feature_types = feature_types
@@ -450,6 +454,16 @@ class DMatrix(object):
         """
         self.set_float_info('weight', weight)
 
+    def set_timing(self, timing):
+        """ Set timing of each instance.
+
+        Parameters
+        ----------
+        timing : array like
+            Timing for each data point
+        """
+        self.set_float_info('timing', timing)
+
     def set_base_margin(self, margin):
         """ Set base margin of booster to start from.
 
@@ -495,6 +509,15 @@ class DMatrix(object):
         weight : array
         """
         return self.get_float_info('weight')
+
+    def get_timing(self):
+        """Get the timing of the DMatrix.
+
+        Returns
+        -------
+        timing : array
+        """
+        return self.get_float_info('timing')
 
     def get_base_margin(self):
         """Get the base margin of the DMatrix.

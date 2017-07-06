@@ -29,6 +29,7 @@ void MetaInfo::Clear() {
   root_index.clear();
   group_ptr.clear();
   weights.clear();
+  timing.clear();
   base_margin.clear();
 }
 
@@ -41,6 +42,7 @@ void MetaInfo::SaveBinary(dmlc::Stream *fo) const {
   fo->Write(labels);
   fo->Write(group_ptr);
   fo->Write(weights);
+  fo->Write(timing);
   fo->Write(root_index);
   fo->Write(base_margin);
 }
@@ -56,6 +58,7 @@ void MetaInfo::LoadBinary(dmlc::Stream *fi) {
   CHECK(fi->Read(&labels)) <<  "MetaInfo: invalid format";
   CHECK(fi->Read(&group_ptr)) << "MetaInfo: invalid format";
   CHECK(fi->Read(&weights)) << "MetaInfo: invalid format";
+  CHECK(fi->Read(&timing)) << "MetaInfo: invalid format";
   CHECK(fi->Read(&root_index)) << "MetaInfo: invalid format";
   CHECK(fi->Read(&base_margin)) << "MetaInfo: invalid format";
 }
@@ -121,6 +124,10 @@ void MetaInfo::SetInfo(const char* key, const void* dptr, DataType dtype, size_t
     weights.resize(num);
     DISPATCH_CONST_PTR(dtype, dptr, cast_dptr,
                        std::copy(cast_dptr, cast_dptr + num, weights.begin()));
+  } else if (!std::strcmp(key, "timing")) {
+    timing.resize(num);
+    DISPATCH_CONST_PTR(dtype, dptr, cast_dptr,
+                       std::copy(cast_dptr, cast_dptr + num, timing.begin()));
   } else if (!std::strcmp(key, "base_margin")) {
     base_margin.resize(num);
     DISPATCH_CONST_PTR(dtype, dptr, cast_dptr,
@@ -224,6 +231,10 @@ DMatrix* DMatrix::Load(const std::string& uri,
     if (MetaTryLoadFloatInfo(fname + ".weight", &info.weights) && !silent) {
       LOG(CONSOLE) << info.weights.size()
                    << " weights are loaded from " << fname << ".weight";
+    }
+    if (MetaTryLoadFloatInfo(fname + ".timing", &info.timing) && !silent) {
+      LOG(CONSOLE) << info.timing.size()
+                   << " timings are loaded from " << fname << ".timing";
     }
   }
   return dmat;

@@ -115,6 +115,7 @@ class NativeDataIter : public dmlc::Parser<uint32_t> {
     offset_.clear();
     label_.clear();
     weight_.clear();
+    timing_.clear();
     index_.clear();
     value_.clear();
     offset_.insert(offset_.end(), batch.offset, batch.offset + batch.size + 1);
@@ -123,6 +124,9 @@ class NativeDataIter : public dmlc::Parser<uint32_t> {
     }
     if (batch.weight != nullptr) {
       weight_.insert(weight_.end(), batch.weight, batch.weight + batch.size);
+    }
+    if (batch.timing != nullptr) {
+      timing_.insert(timing_.end(), batch.timing, batch.timing + batch.size);
     }
     if (batch.index != nullptr) {
       index_.insert(index_.end(), batch.index + offset_[0], batch.index + offset_.back());
@@ -140,11 +144,13 @@ class NativeDataIter : public dmlc::Parser<uint32_t> {
     block_.offset = dmlc::BeginPtr(offset_);
     block_.label = dmlc::BeginPtr(label_);
     block_.weight = dmlc::BeginPtr(weight_);
+    block_.timing = dmlc::BeginPtr(timing_);
     block_.index = dmlc::BeginPtr(index_);
     block_.value = dmlc::BeginPtr(value_);
     bytes_read_ += offset_.size() * sizeof(size_t) +
         label_.size() * sizeof(dmlc::real_t) +
         weight_.size() * sizeof(dmlc::real_t) +
+        timing_.size() * sizeof(dmlc::real_t) +
         index_.size() * sizeof(uint32_t) +
         value_.size() * sizeof(dmlc::real_t);
   }
@@ -164,6 +170,8 @@ class NativeDataIter : public dmlc::Parser<uint32_t> {
   std::vector<dmlc::real_t> label_;
   // internal weight data
   std::vector<dmlc::real_t> weight_;
+  // internal timing data
+  std::vector<dmlc::real_t> timing_;
   // internal index.
   std::vector<uint32_t> index_;
   // internal value.
@@ -412,6 +420,9 @@ XGB_DLL int XGDMatrixSliceDMatrix(DMatrixHandle handle,
     if (src.info.weights.size() != 0) {
       ret.info.weights.push_back(src.info.weights[ridx]);
     }
+    if (src.info.timing.size() != 0) {
+      ret.info.timing.push_back(src.info.timing[ridx]);
+    }
     if (src.info.base_margin.size() != 0) {
       ret.info.base_margin.push_back(src.info.base_margin[ridx]);
     }
@@ -482,6 +493,8 @@ XGB_DLL int XGDMatrixGetFloatInfo(const DMatrixHandle handle,
     vec = &info.labels;
   } else if (!std::strcmp(field, "weight")) {
     vec = &info.weights;
+  } else if (!std::strcmp(field, "timing")) {
+    vec = &info.timing;
   } else if (!std::strcmp(field, "base_margin")) {
     vec = &info.base_margin;
   } else {

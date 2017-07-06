@@ -50,6 +50,8 @@ struct MetaInfo {
   std::vector<bst_uint> group_ptr;
   /*! \brief weights of each instance, optional */
   std::vector<bst_float> weights;
+  /*! \brief timing curve for each instance, optional */
+  std::vector<bst_float> timing;
   /*!
    * \brief initialized margins,
    * if specified, xgboost will start from this init margin
@@ -67,6 +69,14 @@ struct MetaInfo {
    */
   inline bst_float GetWeight(size_t i) const {
     return weights.size() != 0 ?  weights[i] : 1.0f;
+  }
+  /*!
+   * \brief Get the timing of i-th instance.
+   * \param i Instance index.
+   * \return The pre-defined timing of i-th instance.
+   */
+  inline bst_float GetTiming(size_t i) const {
+    return timing.size() != 0 ?  timing[i] : 1.0f;
   }
   /*!
    * \brief Get the root index of i-th instance.

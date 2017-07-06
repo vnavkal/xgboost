@@ -54,6 +54,8 @@ typedef struct {
   float* label;
   /*! \brief weight of each instance, can be NULL */
   float* weight;
+  /*! \brief timing of each instance, can be NULL */
+  float* timing;
   /*! \brief feature index */
   int* index;
   /*! \brief feature values */
